@@ -9,53 +9,32 @@
       <button>打开豆瓣App</button>
     </div>
 
-    <div class="movie-item">
+    <div class="movie-item" v-for="(cate, j) in categoryList" :key="cate.name">
       <p class="title">
-        <span>影院热映</span>
+        <span>{{cate.name}}</span>
         <span class="more-link">更多</span>
       </p>
       <scroll-view class="scroll-view_H"
                    scroll-x="true"
-                   style="width: 100%" enable-flex>
+                   style="width: 100%"
+                   enable-flex>
 
         <div class="scroll-view-item_H"
-             v-for="item in theaterMovies"
+             v-for="item in cate.movieList"
              :key="item.id">
           <img :src="item.images.large"
                alt="">
           <p class="text-line1">{{item.title}}</p>
           <div class="rating">
-            <div class="stars" v-if="item.rating.average">
-              <img v-for="(item2,i) in item.starNum" :key="item2" src="../../../static/images/star.svg"
+            <div class="stars"
+                 v-if="item.rating.average">
+              <img v-for="(item2,i) in item.starNum"
+                   :key="item2"
+                   src="../../../static/images/star.svg"
                    alt="">
-              <img v-for="(item2,i) in (5-item.starNum)" :key="item2" src="../../../static/images/unstar.svg"
-                   alt="">
-            </div>
-            <span>{{item.rating.average?item.rating.average:'暂无评论'}}</span>
-          </div>
-        </div>
-      </scroll-view>
-    </div>
-    <div class="movie-item">
-      <p class="title">
-        <span>TOP250</span>
-        <span class="more-link">更多</span>
-      </p>
-      <scroll-view class="scroll-view_H"
-                   scroll-x="true"
-                   style="width: 100%" enable-flex>
-
-        <div class="scroll-view-item_H"
-             v-for="item in top250Movies"
-             :key="item.id">
-          <img :src="item.images.large"
-               alt="">
-          <p class="text-line1">{{item.title}}</p>
-          <div class="rating">
-            <div class="stars" v-if="item.rating.average">
-              <img v-for="(item2,i) in item.starNum" :key="item2" src="../../../static/images/star.svg"
-                   alt="">
-              <img v-for="(item2,i) in (5-item.starNum)" :key="item2" src="../../../static/images/unstar.svg"
+              <img v-for="(item2,i) in (5-item.starNum)"
+                   :key="item2"
+                   src="../../../static/images/unstar.svg"
                    alt="">
             </div>
             <span>{{item.rating.average?item.rating.average:'暂无评论'}}</span>
@@ -70,47 +49,36 @@
 export default {
   data () {
     return {
-      theaterMovies: [],
-      top250Movies: []
+      categoryList: [
+        {
+          name: '影院热映',
+          param: 'in_theaters',
+          movieList: []
+        },
+        {
+          name: 'TOP250',
+          param: 'top250',
+          movieList: []
+        }
+      ]
     }
   },
   created () {
-    this.getTheaterMovies()
-    this.getTop250Movies()
+    this.categoryList.forEach(v => {
+      this.getMovieList(v)
+    })
   },
   methods: {
-    getTheaterMovies () {
-      wx.request({
-        url: 'https://api.douban.com/v2/movie/in_theaters?apikey=0df993c66c0c636e29ecbb5344252a4a',
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        success: res => {
-          console.log(res)
-          let movieList = res.data.subjects
+    getMovieList (movie) {
+      this.$request({
+        url: `/v2/movie/${movie.param}?apikey=0df993c66c0c636e29ecbb5344252a4a`
+      }).then(res => {
+        let movieList = res.data.subjects
 
-          movieList.forEach(v => {
-            v.starNum = Math.ceil(v.rating.average / 2)
-          })
-          this.theaterMovies = movieList
-        }
-      })
-    },
-    getTop250Movies () {
-      wx.request({
-        url: 'https://api.douban.com/v2/movie/top250?apikey=0df993c66c0c636e29ecbb5344252a4a',
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        success: res => {
-          console.log(res)
-          let movieList = res.data.subjects
-
-          movieList.forEach(v => {
-            v.starNum = Math.ceil(v.rating.average / 2)
-          })
-          this.top250Movies = movieList
-        }
+        movieList.forEach(v => {
+          v.starNum = Math.ceil(v.rating.average / 2)
+        })
+        movie.movieList = movieList
       })
     }
   }
@@ -143,7 +111,7 @@ export default {
 }
 
 .movie-item {
-  margin-bottom:62rpx;
+  margin-bottom: 62rpx;
   .title {
     height: 88rpx;
     display: flex;
@@ -158,32 +126,32 @@ export default {
 
 .scroll-view_H {
   display: flex;
-  margin-top:12rpx;
+  margin-top: 12rpx;
   height: 370rpx;
 }
 .scroll-view-item_H {
-  width:200rpx;
+  width: 200rpx;
   margin-right: 18rpx;
   img {
     width: 200rpx;
     height: 286rpx;
   }
-  p{
+  p {
     text-align: center;
   }
 }
 
-.rating{
+.rating {
   display: flex;
   justify-content: center;
-  span{
+  span {
     color: #aaa;
-    margin-left:8rpx;
+    margin-left: 8rpx;
   }
 }
 
-.stars{
-  img{
+.stars {
+  img {
     width: 20rpx;
     height: 20rpx;
   }
