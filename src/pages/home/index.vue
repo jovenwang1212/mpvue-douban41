@@ -26,7 +26,36 @@
           <p class="text-line1">{{item.title}}</p>
           <div class="rating">
             <div class="stars" v-if="item.rating.average">
-              <img v-for="(item2,i) in 5" :key="item2" src="../../../static/images/star.svg"
+              <img v-for="(item2,i) in item.starNum" :key="item2" src="../../../static/images/star.svg"
+                   alt="">
+              <img v-for="(item2,i) in (5-item.starNum)" :key="item2" src="../../../static/images/unstar.svg"
+                   alt="">
+            </div>
+            <span>{{item.rating.average?item.rating.average:'暂无评论'}}</span>
+          </div>
+        </div>
+      </scroll-view>
+    </div>
+    <div class="movie-item">
+      <p class="title">
+        <span>TOP250</span>
+        <span class="more-link">更多</span>
+      </p>
+      <scroll-view class="scroll-view_H"
+                   scroll-x="true"
+                   style="width: 100%" enable-flex>
+
+        <div class="scroll-view-item_H"
+             v-for="item in top250Movies"
+             :key="item.id">
+          <img :src="item.images.large"
+               alt="">
+          <p class="text-line1">{{item.title}}</p>
+          <div class="rating">
+            <div class="stars" v-if="item.rating.average">
+              <img v-for="(item2,i) in item.starNum" :key="item2" src="../../../static/images/star.svg"
+                   alt="">
+              <img v-for="(item2,i) in (5-item.starNum)" :key="item2" src="../../../static/images/unstar.svg"
                    alt="">
             </div>
             <span>{{item.rating.average?item.rating.average:'暂无评论'}}</span>
@@ -41,11 +70,13 @@
 export default {
   data () {
     return {
-      theaterMovies: []
+      theaterMovies: [],
+      top250Movies: []
     }
   },
   created () {
     this.getTheaterMovies()
+    this.getTop250Movies()
   },
   methods: {
     getTheaterMovies () {
@@ -56,7 +87,29 @@ export default {
         },
         success: res => {
           console.log(res)
-          this.theaterMovies = res.data.subjects
+          let movieList = res.data.subjects
+
+          movieList.forEach(v => {
+            v.starNum = Math.ceil(v.rating.average / 2)
+          })
+          this.theaterMovies = movieList
+        }
+      })
+    },
+    getTop250Movies () {
+      wx.request({
+        url: 'https://api.douban.com/v2/movie/top250?apikey=0df993c66c0c636e29ecbb5344252a4a',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        success: res => {
+          console.log(res)
+          let movieList = res.data.subjects
+
+          movieList.forEach(v => {
+            v.starNum = Math.ceil(v.rating.average / 2)
+          })
+          this.top250Movies = movieList
         }
       })
     }
@@ -90,6 +143,7 @@ export default {
 }
 
 .movie-item {
+  margin-bottom:62rpx;
   .title {
     height: 88rpx;
     display: flex;
@@ -105,6 +159,7 @@ export default {
 .scroll-view_H {
   display: flex;
   margin-top:12rpx;
+  height: 370rpx;
 }
 .scroll-view-item_H {
   width:200rpx;
