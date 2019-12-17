@@ -16,7 +16,7 @@
       </p>
       <scroll-view class="scroll-view_H"
                    scroll-x="true"
-                   style="width: 100%">
+                   style="width: 100%" enable-flex>
 
         <div class="scroll-view-item_H"
              v-for="item in theaterMovies"
@@ -104,11 +104,9 @@ export default {
 
 .scroll-view_H {
   display: flex;
-  white-space: nowrap;
   margin-top:12rpx;
 }
 .scroll-view-item_H {
-  display: inline-block;
   width:200rpx;
   margin-right: 18rpx;
   img {
